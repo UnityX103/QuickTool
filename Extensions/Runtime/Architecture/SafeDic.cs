@@ -6,12 +6,16 @@ using UnityEngine;
 [System.Serializable]
 public class SafeDic<Key,Value>
 {
+    [HideInInspector]
     [SerializeField]
     private string name;
+    [HideInInspector]
     [SerializeField]
     private string keyName;
+    [HideInInspector]
     [SerializeField]
     private string valueName;
+    [HideInInspector]
     [SerializeField]
     private bool warning = true;
 

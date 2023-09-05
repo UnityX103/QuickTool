@@ -46,13 +46,7 @@ public abstract class ScriptableObjectGroup : SerializedScriptableObject
         {
             if (item is ChildScriptableObject childScriptableObject)
             {
-                if (!_childScriptableObjects.TryGetValue(childScriptableObject.GetType(), out var list))
-                {
-                    list = new List<ChildScriptableObject>();
-                    _childScriptableObjects.Add(childScriptableObject.GetType(), list);
-                }
-
-                list.Add(childScriptableObject);
+                _childScriptableObjects.Add(childScriptableObject);
             }
         }
     }
@@ -60,22 +54,19 @@ public abstract class ScriptableObjectGroup : SerializedScriptableObject
     public IEnumerable<Type> GetTypeList() => OdinStaticExtansion.GetTypes(TypeList());
 #endif
 
-    [ReadOnly] [LabelText("子物体列表")] [SerializeField]
+        
+
+    [Searchable]
+  [LabelText("子物体列表")] [SerializeField]
     [PropertyOrder	(90)]
-    private Dictionary<Type, List<ChildScriptableObject>> _childScriptableObjects =
-        new Dictionary<Type, List<ChildScriptableObject>>();
+    private List<ChildScriptableObject> _childScriptableObjects =
+        new List<ChildScriptableObject>();
 
     protected abstract Type[] TypeList();
 
     public T GetChildScriptableObject<T>(string childName) where T : ChildScriptableObject
     {
-        if (_childScriptableObjects.TryGetValue(typeof(T), out var list))
-        {
-            return list.First(e => e.name == childName) as T;
-        }
-
-        Debug.LogError("没有找到对应的子物体");
-        return null;
+        return _childScriptableObjects.First(e => e.name == childName) as T;
     }
 }
 

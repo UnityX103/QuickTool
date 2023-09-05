@@ -7,25 +7,38 @@ using UnityEngine;
 /// 命令接口（顶层向底层）
 /// </summary>
 public interface ICommand : IBelongToArchitecture, ICanSetArchitecture, ICanGetSystem, ICanGetModel, ICanGetUtility,
-    ICanSendEvent, ICanSendCommand
+    ICanSendEvent, ICanSendCommand,ICanSendQuery
 {
     void Execute();
 }
+public interface ICommand<TResult> : IBelongToArchitecture, ICanSetArchitecture, ICanGetSystem, ICanGetModel,
+    ICanGetUtility,
+    ICanSendEvent, ICanSendCommand, ICanSendQuery
+{
+    TResult Execute();
+}
 
 
+[System.Serializable]
 public class BaseCommand : ICommand
 {
-    
+    public uint Results { get; protected set; } = 1;
+
     public bool Available;
     private IArchitecture mArchitecture;
-    protected bool mAutoRelease = true;
+    protected bool mAutoRelease ;
+
+    public BaseCommand()
+    {
+        bool mAutoRelease = true;
+    }
 
     void ICommand.Execute()
     {
         Execute();
     }
 
-    protected void TurnOffAutoRelease()
+    public virtual void TurnOffAutoRelease()
     {
         mAutoRelease = false;
     }
@@ -34,9 +47,9 @@ public class BaseCommand : ICommand
     {
     }
 
-    public virtual void OnRelease()
+    public virtual void Release()
     {
-        Available = true;
+        mAutoRelease = true;
     }
 
     public IArchitecture GetArchitecture()
@@ -58,16 +71,18 @@ public abstract class AbstractCommand : BaseCommand
         base.Execute();
         OnExecute();
         if (mAutoRelease)
-            this.Release();
+            this.DoRelease();
     }
 
     protected abstract void OnExecute();
 
-    public override void OnRelease()
+    public sealed override void Release()
     {
-        base.OnRelease();
+        base.Release();
         OnDispose();
     }
 
-    protected abstract void OnDispose();
+    protected virtual void OnDispose()
+    {
+    }
 }

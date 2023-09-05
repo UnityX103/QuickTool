@@ -18,5 +18,14 @@ namespace FrameworkExtensions.Mono.GameObject
             Object.Destroy(obj);
         }
 
+        public static void DestroyComp(this UnityEngine.Component self)
+        {
+            if (self is ITriggerWhenDestroy triggerWhenDestroy)
+            {
+                triggerWhenDestroy.WhenDestroy();
+            }
+            GameObject.Destroy(self);
+        }
+
     }
 }

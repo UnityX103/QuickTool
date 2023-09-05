@@ -14,9 +14,5 @@ public interface IView : IController, ICanInit,ITriggerWhenDestroy
 
 }
 
-public interface IAsyncView : IBelongToArchitecture, ICanGetSystem, ICanGetModel, ICanSendCommand, ICanRegisterEvent, ICanInitAsync
-{
-
-}
 
 

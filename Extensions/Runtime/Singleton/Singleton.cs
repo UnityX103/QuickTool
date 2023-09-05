@@ -18,5 +18,6 @@ public class Singleton<T> where T:new()
             _instance = value;
         }
     }
+ 
 }
     

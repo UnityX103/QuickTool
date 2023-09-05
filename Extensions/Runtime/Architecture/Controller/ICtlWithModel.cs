@@ -2,7 +2,7 @@ using System;
 
 namespace FrameworkExtensions.Architecture.Model
 {
-    public interface IModelWithCtl: IModel
+    public interface ICtlWithModel: IModel
     {
     
     }

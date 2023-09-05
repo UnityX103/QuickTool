@@ -10,8 +10,6 @@ using UnityEngine.SceneManagement;
 #pragma warning disable CS0693 // 类型参数与外部类型中的类型参数同名
 public interface IArchitecture
 {
-    void DoInit();
-
     /// <summary>
     /// 注册系统
     /// </summary>
@@ -31,10 +29,12 @@ public interface IArchitecture
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="instance"></param>
-    void RegisterUtility<T>(T instance);
+    void RegisterUtility<T>(T instance) where T : IUtility;
 
     T GetSystem<T>() where T : class, ISystem;
 
+    ISystem GetSystem(Type system);
+    
     /// <summary>
     /// 获取model
     /// </summary>
@@ -57,10 +57,16 @@ public interface IArchitecture
     /// <typeparam name="T"></typeparam>
     T GetCommand<T>() where T : BaseCommand, new();
 
+    
+    TResult SendQuery<TResult>(IQuery<TResult> query);
+    
     void SendCommand(ICommand command);
 
+    
     void ReleaseCommand<T>(T command) where T : BaseCommand, new();
 
+    
+    
     /// <summary>
     /// 发送事件
     /// </summary>
@@ -91,7 +97,7 @@ public abstract class Architecture<T> : IArchitecture where T : Architecture<T>,
     private static T mArchitecture = null;
     private Dictionary<Type, ICommandPool> mCommandPools;
 
-    private Dictionary<Type, ICommandPool> CommandPools => mCommandPools ??= new Dictionary<Type, ICommandPool>();
+    public Dictionary<Type, ICommandPool> CommandPools => mCommandPools ??= new Dictionary<Type, ICommandPool>();
 
     public static IArchitecture Interface
     {
@@ -133,7 +139,6 @@ public abstract class Architecture<T> : IArchitecture where T : Architecture<T>,
 
     private static void MakeSureArchitecture()
     {
-        Debug.LogError($"启动架构{typeof(T)}");
         mArchitecture = new T();
         mArchitecture.Init();
 
@@ -160,11 +165,6 @@ public abstract class Architecture<T> : IArchitecture where T : Architecture<T>,
         mArchitecture.mInited = true;
     }
 
-    public void DoInit()
-    {
-        Init();
-        mInited = true;
-    }
 
     protected abstract void Init();
 
@@ -175,7 +175,7 @@ public abstract class Architecture<T> : IArchitecture where T : Architecture<T>,
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="instance"></param>
-    public void RegisterModel<T>(T instance) where T : IModel
+    public virtual void RegisterModel<T>(T instance) where T : IModel
     {
         //复制model的架构
         instance.SetArchitecture(this);
@@ -192,7 +192,7 @@ public abstract class Architecture<T> : IArchitecture where T : Architecture<T>,
         }
     }
 
-    public void RegisterUtility<T>(T instance)
+    public void RegisterUtility<T>(T instance) where T: IUtility
     {
         mContainer.Register(instance);
     }
@@ -211,6 +211,11 @@ public abstract class Architecture<T> : IArchitecture where T : Architecture<T>,
         {
             mSystems.Add(instance);
         }
+    }
+
+    public ISystem GetSystem(Type system)
+    {
+        return mContainer.Get(system) as ISystem;
     }
 
     public T GetModel<T>() where T : class, IModel
@@ -233,6 +238,7 @@ public abstract class Architecture<T> : IArchitecture where T : Architecture<T>,
         return mContainer.Get<T>();
     }
 
+    
     public T GetCommand<T>() where T : BaseCommand, new()
     {
         if (!CommandPools.TryGetValue(typeof(T), out var pool))
@@ -244,8 +250,17 @@ public abstract class Architecture<T> : IArchitecture where T : Architecture<T>,
         var command = pool.Get<T>();
 
         ((ICommand)command).SetArchitecture(this);
-        command.Available = false;
         return command;
+    }
+
+    public TResult SendQuery<TResult>(IQuery<TResult> query)
+    {
+        return DoQuery<TResult>(query);
+    }
+    protected virtual TResult DoQuery<TResult>(IQuery<TResult> query)
+    {
+        query.SetArchitecture(this);
+        return query.Do();
     }
 
     public void SendCommand(ICommand command)

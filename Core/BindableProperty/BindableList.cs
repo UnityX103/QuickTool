@@ -24,6 +24,15 @@ public class BindableList<T>
             mList= value;
         }
     }
+    
+    public void Foreach(Action<T> action)
+    {
+        foreach (var item in List)
+        {
+            action?.Invoke(item);
+        }
+    }
+    
     /// <summary>
     /// 集合数量
     /// </summary>
@@ -50,7 +59,6 @@ public class BindableList<T>
     public List<T> List
     {
         get => mList;
-        set => mList = value;
     }
 
    
@@ -150,12 +158,24 @@ public class BindableList<T>
 
         return new BLReplaceUnRegister<T>(this, action);
     }
-
     public void UnRegisterReplaceAction(Action<T> action)
     {
         mReplaceAction -= action;
     }
     
+    
+    
+    public IUnRegister RegisterClearAction(Action action)
+    {
+        mClearAction += action;
+
+        return new BLClearUnRegister<T>(this, action);
+    }
+    public void UnRegisterClearAction(Action action)
+    {
+        mClearAction -= action;
+    }
+
     public IUnRegister RegisterListChangedAction(Action<List<T>> action)
     {
         mListChangedAction += action;
@@ -209,6 +229,24 @@ public class BindableListUnRegister<T> : IUnRegister
     }
 }
 
+
+public class BindableListUnRegisterNoParam<T>: IUnRegister
+{
+    public BindableListUnRegisterNoParam(BindableList<T> bindableList,Action action)
+    {
+        mAction = action;
+        mBindableList = bindableList;
+    }
+
+    public BindableList<T> mBindableList;
+    public Action mAction;
+
+
+    public virtual void UnRegister()
+    {
+        
+    }
+}
 public class BLAddUnRegister<T> : BindableListUnRegister<T>
 {
     public BLAddUnRegister(BindableList<T> bindableList, Action<T> action):base(bindableList,action)
@@ -245,6 +283,19 @@ public class BLReplaceUnRegister<T> : BindableListUnRegister<T>
     public override void UnRegister()
     {
         mBindableList.UnRegisterReplaceAction(mAction);
+    }
+}
+
+public class BLClearUnRegister<T> : BindableListUnRegisterNoParam<T>
+{
+    public BLClearUnRegister(BindableList<T> bindableList, Action action) : base(bindableList, action)
+    {
+
+    }
+
+    public override void UnRegister()
+    {
+        mBindableList.UnRegisterClearAction(mAction);
     }
 }
 

@@ -8,7 +8,7 @@ public interface ICanInit
     void Init();
 }
 
-public interface ICanInitAsync
-{
-    UniTask InitAsync();
-}
+// public interface ICanInitAsync
+// {
+//     UniTask InitAsync();
+// }

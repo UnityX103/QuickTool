@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using Cysharp.Threading.Tasks;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 
@@ -34,8 +35,8 @@ namespace Plugins.Framework.Core
         {
             await OnExecute();
             _onComplete?.Invoke();
-            if (mAutoRelease)
-                this.Release();
+          if (mAutoRelease)
+                this.DoRelease();
         }
 
         protected abstract UniTask OnExecute();
@@ -45,21 +46,22 @@ namespace Plugins.Framework.Core
             return task;
         }
 
-        public override void OnRelease()
+        public override void Release()
         {
-            base.OnRelease();
+            base.Release();
             OnDispose();
         }
 
-        protected abstract void OnDispose();
+     protected abstract void OnDispose();
     }
 
 
     public abstract class ACommand<T> : ACommand
     {
         private UniTask task;
-        private bool mAutoRelease = true;
-        protected T mValue;
+
+        [SerializeField]
+        protected T Value;
 
         /// <summary>
         ///  设置值
@@ -68,8 +70,42 @@ namespace Plugins.Framework.Core
         /// <returns></returns>
         public virtual ACommand<T> SetValue(T value)
         {
-            mValue = value;
+            Value = value;
             return this;
+        }
+        
+        protected override void OnDispose()
+        {
+            Value = default;
+        }
+    }
+    
+    
+    public abstract class ACommand<T,T2> : ACommand
+    {
+        private UniTask task;
+
+        [ShowInInspector]
+        protected T Value;
+        [ShowInInspector]
+        protected T2 Value2;
+        
+        /// <summary>
+        ///  设置值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public virtual ACommand<T,T2> SetValue(T value,T2 value2)
+        {
+            Value = value;
+            Value2 = value2;
+            return this;
+        }
+        
+        protected override void OnDispose()
+        {
+            Value = default;
+            Value2 = default;
         }
     }
 }

@@ -16,16 +16,16 @@ public static class ResFactory
 {
     const string AA_PATH = "Assets/AAResources/";
 
-    /// <summary>
-    /// async加载
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="path">直接填AAResources下的路径</param>
-    /// <returns></returns>
-    public static async UniTask<T> LoadAsync<T>(string path) where T : Object
+    public static async UniTask<IList<T>> LoadAllAsync<T>(string path)where T   : Object
     {
-        return await Addressables.LoadAssetAsync<T>(AA_PATH + path).Task;
+        var list = await Addressables.LoadAssetsAsync<T>(AA_PATH + path, null).Task;
+        if (list == null)
+        {
+            Debug.LogError($"异步加载失败：{AA_PATH+path}");
+        }
+        return list;
     }
+
 
     /// <summary>
     /// async加载
@@ -33,12 +33,14 @@ public static class ResFactory
     /// <typeparam name="T"></typeparam>
     /// <param name="path">直接填AAResources下的路径</param>
     /// <returns></returns>
-    public static  void LoadAsyncTest<T>(string path) where T : Object
+    public static async UniTask<T> LoadAsync<T>(string path) where T : class
     {
-          Addressables.LoadAssetsAsync<T>(path,(e)=>
-        {
-            Debug.LogError(e.name);
-        });
+        var handle = Addressables.LoadAssetAsync<T>(AA_PATH + path);
+        Debug.Log($"异步加载：{AA_PATH + path}");
+        var obj = await handle.Task;
+        //这一步是否有必要
+       // Addressables.Release(handle);
+        return obj;
     }
 
     /// <summary>
@@ -117,7 +119,7 @@ public static class ResFactory
     /// </summary>
     /// <param name="asset">加载完成时的回调</param>
     /// <typeparam name="T">需要加载的资产类型</typeparam>
-    public static async void Load<T>(string path, Action<T> asset) where T : UnityEngine.Object
+    public static async void Load<T>(string path, Action<T> asset) where T : class
     {
         var data = await Addressables.LoadAssetAsync<T>(AA_PATH + path).Task;
         asset?.Invoke(data);

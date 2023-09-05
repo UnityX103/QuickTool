@@ -11,6 +11,25 @@ public class  IOCContainer
 
     public Dictionary<Type, object> mInstances = new Dictionary<Type, object>();
 
+    public bool ContainsKey(Type type)
+    {
+        return mInstances.ContainsKey(type);
+    }
+
+    public void RegisterObj(object instance)
+    {
+        var type = instance.GetType();
+        if (mInstances.ContainsKey(type))
+        {
+            mInstances[type] = null;
+            mInstances[type] = instance;
+        }
+        else
+        {
+            mInstances.Add(type,instance);
+        } 
+    }
+
     /// <summary>
     /// 注册
     /// </summary>
@@ -65,5 +84,22 @@ public class  IOCContainer
         Debug.LogError($"IOC获取（{type}）失败，未组册/注册的是接口");
         return null;
     }
+    
+     public void UnRegister<T>()
+     {
+         var key = typeof(T);
+         if (mInstances.ContainsKey(key))
+         {
+             mInstances.Remove(key);
+         }
+     }
+     
+        public void UnRegister(Type type)
+        {
+            if (mInstances.ContainsKey(type))
+            {
+                mInstances.Remove(type);
+            }
+        }
     
 }

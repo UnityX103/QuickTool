@@ -7,7 +7,7 @@ public static class GameTool
         LogError(a.ToString()+"："+b.ToString());
     }
 
-    public static void LogError(string str)
+    public static void LogError(object str)
     {
         Debug.LogWarning($"<color=red>Error__{str}</color>");
     }
@@ -40,6 +40,19 @@ public static class GameTool
     {
         Debug.Log(string.Format($"<color=yellow>{str}</color>"));
     }
-  
+    public static void LogPositive(object str,object str1)
+    {
+        LogPositive(str+"："+str1);
+    }
+    
+    public static void LogWithColor(object str,Color color)
+    {
+        Debug.Log("<color=#" + ColorUtility.ToHtmlStringRGBA(color) + ">" + str + "</color>");
+    }
+    
+    public static void LogWithColor(object str,object str1,Color color)
+    {
+        Debug.Log("<color=#" + ColorUtility.ToHtmlStringRGBA(color) + ">" + str + "</color>："+str1);
+    }
 }
 

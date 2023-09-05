@@ -1,4 +1,6 @@
 using System;
+using App.View;
+using FrameworkExtensions.Mono.GameObject;
 using Sirenix.OdinInspector;
 
 /// <summary>
@@ -7,8 +9,11 @@ using Sirenix.OdinInspector;
 public abstract class AbstractViewTemplate : SerializedMonoBehaviour, IView
 {
     [LabelText("自动初始化")] public bool autoInit = false;
+    [ShowIf(nameof(autoInit))]
     [LabelText("初始化后自动隐藏")] public bool autoHideObj = false;
 
+    [ReadOnly]
+    [ShowInInspector]
     private bool _isInit = false;
 
     private void Start()
@@ -38,15 +43,11 @@ public abstract class AbstractViewTemplate : SerializedMonoBehaviour, IView
 
     public abstract IArchitecture GetArchitecture();
     
-    public void RegisterAutoDestoryEvent<T>(Action<T> action)
-    {
-        GetArchitecture().RegisterEvent<T>(e => { action.Invoke(e); }).UnRegisterWhenGameObjectDestory(gameObject);
-    }
-
+  
 
     private TempEventHelper _tempEventHelper;
 
-    protected TempEventHelper TempEventHelper
+    public TempEventHelper TempEventHelper
     {
         get
         {
@@ -63,13 +64,19 @@ public abstract class AbstractViewTemplate : SerializedMonoBehaviour, IView
     {
         TempEventHelper.RegisterTempEvent(action);
     }
+    
+    protected T RegisterTempDestroyBindable<T>(BindableProperty<T> bindableProperty , Action<T> callback)
+    {
+        TempEventHelper.AddUnRegister(this.RegisterAutoDestroyBindable<T>(bindableProperty,callback));
+        return bindableProperty.Value;
+    }
    
     public void ClearTempEvent()
     {
-        TempEventHelper.UnRegisterAllEvent();
+        TempEventHelper.Clear();
     }
-
-
+    
+    
     public virtual void WhenDestroy()
     {
         ClearTempEvent();

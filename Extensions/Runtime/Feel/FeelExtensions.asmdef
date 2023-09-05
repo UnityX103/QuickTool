@@ -1,0 +1,17 @@
+{
+    "name": "FeelExtensions",
+    "rootNamespace": "",
+    "references": [
+        "GUID:4a1cb1490dc4df8409b2580d6b44e75e",
+        "GUID:0d31eceffc5f74bd88d7d0144221778b"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
